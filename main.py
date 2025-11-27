@@ -17,7 +17,7 @@ class PasswordResponse(BaseModel):
     password: str
     strength: str
     score: str
-    massage: str | None = None
+    message: str | None = None
 
 class PasswordCheckRequest(BaseModel):
     password: str = Field(..., min_length=8)
@@ -45,7 +45,7 @@ def check_password_strength(password: str) -> dict():
     else:
         feedback.append('It must have at least one uppercase letter.')
 
-    if re.search(r'/d', password):
+    if re.search(r'\d', password):
         scop += 1
     else:
         feedback.append('It must have at least one digits.')
@@ -65,7 +65,7 @@ def check_password_strength(password: str) -> dict():
         strength = 'weak'
 
     return {
-        'scop': scop,
+        'scop':str(scop),
         'strength': strength,
         'massage': 'Great! The password is very secure.' if scop == 4 else ( ','.join(feedback)+ 'Add'),
     }
@@ -96,9 +96,18 @@ async def generate(request: PasswordGeneratorRequest):
         'score': strength_info['scop'],
     }
 
+#Check the strength of your desired password
 @app.post('/check',response_model = PasswordResponse)
 async def check(password_data: PasswordCheckRequest):
-    pass
+    pwd = password_data.password
+    strength_info = check_password_strength(pwd)
+    return {
+        'password': pwd,
+        'strength': strength_info['strength'],
+        'massage': strength_info['massage'],
+        'score': strength_info['score'],
+    }
+
 
 
 
