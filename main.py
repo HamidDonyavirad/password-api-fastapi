@@ -16,7 +16,7 @@ class PasswordGeneratorRequest(BaseModel):
 class PasswordResponse(BaseModel):
     password: str
     strength: str
-    score: str
+    scop: str
     message: str | None = None
 
 class PasswordCheckRequest(BaseModel):
@@ -24,7 +24,7 @@ class PasswordCheckRequest(BaseModel):
 
 @app.get("/")
 async def root():
-    return {"massage": "Welcome to the Password Generator API"}
+    return {"message": "Welcome to the Password Generator API"}
 
 def check_password_strength(password: str) -> dict():
     scop = 0
@@ -67,7 +67,8 @@ def check_password_strength(password: str) -> dict():
     return {
         'scop':str(scop),
         'strength': strength,
-        'massage': 'Great! The password is very secure.' if scop == 4 else ( ','.join(feedback)+ 'Add'),
+        'message': 'Great! The password is very secure.' if scop == 4 else ( ','.join(feedback)+ 'Add'),
+
     }
 
 
@@ -92,7 +93,7 @@ async def generate(request: PasswordGeneratorRequest):
     return {
         'password': password,
         'strength': strength_info['strength'],
-        'massage': strength_info['massage'],
+        'message': strength_info['message'],
         'score': strength_info['scop'],
     }
 
@@ -104,8 +105,8 @@ async def check(password_data: PasswordCheckRequest):
     return {
         'password': pwd,
         'strength': strength_info['strength'],
-        'massage': strength_info['massage'],
-        'score': strength_info['score'],
+        'message': strength_info['message'],
+        'scop': strength_info['scop'],
     }
 
 
