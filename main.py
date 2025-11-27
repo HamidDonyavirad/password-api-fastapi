@@ -1,4 +1,5 @@
-from fastapi import FastAPI
+import string
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 import random
 import re
@@ -70,13 +71,33 @@ def check_password_strength(password: str) -> dict():
     }
 
 
+#Generate password
+@app.post('/generate', response_model=PasswordResponse)
+async def generate(request: PasswordGeneratorRequest):
+    chars = ''
+    if request.include_lowercase:
+        chars += string.ascii_lowercase
+    if request.include_uppercase:
+        chars += string.ascii_uppercase
+    if request.include_digits:
+        chars += string.digits
+    if request.include_symbols:
+        chars += "!#$%&'()*+,-./:;<=>?@[\\]^_`{|}~"
 
-@app.post('/generate')
-async def generate(password: str):
-    pass
+    if not chars:
+        raise HTTPException(status_code=400, detail='No characters provided.')
+    password = ''.join(random.choice(chars) for _ in range(request.length))
+    strength_info = check_password_strength(password)
 
-@app.post('/check')
-async def check(password: str):
+    return {
+        'password': password,
+        'strength': strength_info['strength'],
+        'massage': strength_info['massage'],
+        'score': strength_info['scop'],
+    }
+
+@app.post('/check',response_model = PasswordResponse)
+async def check(password_data: PasswordCheckRequest):
     pass
 
 
